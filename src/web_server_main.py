@@ -2,6 +2,15 @@ import sys, signal
 import http.server as hs
 import socketserver as sv
 
+USR = "web"
+PWD = "server"
+
+def login():
+    username = input("Inserire il nome ")
+    password = input("Inserire la password ")
+    return USR == username and \
+        PWD == password
+
 def set_server_port(): #sets the port which the server will be listening, port = 1° argument(8080 by default)
     if sys.argv[1:]:
         return int(sys.argv[1])
@@ -16,14 +25,17 @@ def signal_handler(signal, frame, server): #exit method, with ctrl + c the serve
             server.server_close()
     finally:
         sys.exit(0)
-
-port = set_server_port()
-server = start_httpreq_serverhandler(port)
-server.allow_reuse_address = True #this setting allows to reuse the same address
-signal.signal(signal.SIGINT, signal_handler) 
-try:
-    while True:
-        server.serve_forever() #until the script is running the server will listen to the requests
-except KeyboardInterrupt:
-    pass
-server.server_close()
+if login():
+    print("Accesso eseguito correttamente")
+    port = set_server_port()
+    server = start_httpreq_serverhandler(port)
+    server.allow_reuse_address = True #this setting allows to reuse the same address
+    signal.signal(signal.SIGINT, signal_handler) 
+    try:
+        while True:
+            server.serve_forever() #until the script is running the server will listen to the requests
+    except KeyboardInterrupt:
+        pass
+    server.server_close()
+else:
+    print("password errata ")
